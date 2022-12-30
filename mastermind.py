@@ -97,7 +97,7 @@ def main():
         h = 1
 
         if i == 2:
-            population = random.choices(
+            population = random.sample(
                 [
                     [x, y, z, w]
                     for x in range(NUM_COLORS)
@@ -111,7 +111,7 @@ def main():
         while h <= 0 and 0 <= 1:
             # making our new population
             for _ in range(75):
-                code1, code2 = random.choices(population, k=2)
+                code1, code2 = random.sample(population, k=2)
                 code1, code2 = crossover(code1, code2, random.randint(1, 2))
 
             for idx, code in enumerate(population):
