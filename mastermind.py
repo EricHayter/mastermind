@@ -3,9 +3,21 @@
 import random
 from collections import Counter
 
+# general game variables
 PINS = 4
 COLORS = [i + 1 for i in range(6)]
 NUM_COLORS = len(COLORS)
+POSSIBLE_CODES = [
+    [x, y, z, w]
+    for x in range(NUM_COLORS)
+    for y in range(NUM_COLORS)
+    for z in range(NUM_COLORS)
+    for w in range(NUM_COLORS)
+]
+
+# algorithm parameters
+MAX_SIZE = 60
+MAX_GEN = 100
 
 
 def check(guess: list, answer: list) -> tuple:
@@ -29,11 +41,17 @@ def check(guess: list, answer: list) -> tuple:
     return (exact_matches, near_matches)
 
 
+# simple RNG function. could be better
 def probabilty(chance: float) -> bool:
     if random.random() <= chance:
         return True
 
     return False
+
+
+# returns a random combination from the possible choices that isn't already in the population
+def random_code(population: list) -> list:
+    return random.choice(filter(lambda x: x not in population, POSSIBLE_CODES))
 
 
 def crossover(code1: list, code2: list, n: int) -> tuple:
@@ -81,6 +99,10 @@ def permutation(code: list) -> list:
     return c
 
 
+def inversion(code: list) -> list:
+    c = code.copy()
+
+
 # fitness function
 
 
@@ -89,34 +111,32 @@ def main():
 
     i = 1
     guess = [1, 1, 2, 3]
+    population = None
 
     results = check(guess, answer)
     while results[0] != PINS:
         i += 1
+        # shouldn't actually be a set most likely a list of lists
         eligable_codes = set()
         h = 1
 
-        if i == 2:
-            population = random.sample(
-                [
-                    [x, y, z, w]
-                    for x in range(NUM_COLORS)
-                    for y in range(NUM_COLORS)
-                    for z in range(NUM_COLORS)
-                    for w in range(NUM_COLORS)
-                ],
-                k=150,
-            )
-
-        while h <= 0 and 0 <= 1:
-            # making our new population
+        while h <= MAX_GEN and len(eligable_codes) <= MAX_SIZE:
+            # run the checks in here to see if there are any copies
             for _ in range(75):
-                code1, code2 = random.sample(population, k=2)
+                code1, code2 = random.choices(population, k=2)
                 code1, code2 = crossover(code1, code2, random.randint(1, 2))
 
             for idx, code in enumerate(population):
                 if probabilty(0.03):
                     population[idx] = mutation(code)
+
+            for idx, code in enumerate(population):
+                if probabilty(0.03):
+                    population[idx] = permutation(code)
+
+            # fit in the last randomizing function
+
+            # run fitness function on the codes
 
 
 if __name__ == "__main__":
