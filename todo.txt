@@ -1,0 +1,2 @@
+- Finish inversion function
+- Work on the population generation issues

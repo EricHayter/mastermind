@@ -103,17 +103,43 @@ def inversion(code: list) -> list:
     c = code.copy()
 
 
-# fitness function
+# SHOULDN'T NEED THIS I DON'T THINK
+# def diff(tup1, tup2):
+#     '''
+#     finds the different between two tuples of length 2
+#     diff = |tup2 - tup1|
+#     '''
+#     return (abs(tup2[0]-tup1[0]), abs(tup2[1]-tup1[1]))
+
+# fitness function\
+def fitness(code: list, guesses: list) -> int:
+    fitness_score = 0
+
+    # finds the sum of differences between the previous guesses and the current guess IF the previous guess was the secret code
+    fitness_score += sum(
+        abs(check(code, guess)[0] - score[0]) for guess, score in guesses
+    )
+
+    # might be able to combine this with the line above it
+    fitness_score += sum(
+        abs(check(code, guess)[1] - score[1]) for guess, score in guesses
+    )
+
+    # wtf does this line even do XDD (we will take it out for now)
+    #fitness_score += 2 * PINS * (len(guesses) - 1)
+    return fitness_score
 
 
 def main():
-    answer = [random.randint(1, len(COLORS)) for _ in range(PINS)]
-
+    guesses = []
     i = 1
-    guess = [1, 1, 2, 3]
     population = None
 
+    answer = [random.randint(1, len(COLORS)) for _ in range(PINS)]
+    guess = [1, 1, 2, 3]
     results = check(guess, answer)
+    guesses.append((guess, results))
+
     while results[0] != PINS:
         i += 1
         # shouldn't actually be a set most likely a list of lists
@@ -137,6 +163,9 @@ def main():
             # fit in the last randomizing function
 
             # run fitness function on the codes
+            for code in population:
+                if fitness(code=code, guesses=guesses) == 0:
+                    eligable_codes.add(tuple(code))
 
 
 if __name__ == "__main__":
