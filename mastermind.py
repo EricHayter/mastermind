@@ -20,6 +20,19 @@ MAX_GEN = 100
 
 
 def check(guess: list, answer: list) -> tuple:
+    """Returns the amount of exact matches and near matches in a tuple
+
+    Args:
+        guess (list[str]): the user's guess containing 4 different colors
+        answer (list[str]): the randomly generated answer containing 4 different
+        colors
+
+    Returns:
+        tuple: a tuple (exact_matches, near_matches) where exact matches is when
+        the guess and answer list have the exact same color at an index in the
+        lists and near matches is the same color is found in both lists but not on
+        the same index.
+    """
     exact_matches = 0
     near_matches = 0
 
@@ -40,28 +53,30 @@ def check(guess: list, answer: list) -> tuple:
     return (exact_matches, near_matches)
 
 
-# simple RNG function. could be better not sure how to properly implement something like this
 def probabilty(chance: float) -> bool:
-    if random.random() <= chance:
-        return True
+    """Returns boolean based on chance
 
-    return False
+    Args:
+        chance float: some float [0,1] used as a probability that the function
+        return true
+    Returns:
+        bool: the simulated outcome
+    """
+    return random.random() <= chance
 
 
-# returns a random combination from the possible choices that isn't in the population
 def random_code(population: list) -> list:
-    return random.choice(list(filter(lambda x: x not in population, POSSIBLE_CODES)))
+    """
+
+    """
+    return random.choice([x for x in POSSIBLE_CODES if x not in population])
 
 
 # performs a crossover function n number of times
 def crossover(code1: list, code2: list, n: int) -> tuple:
     c1 = code1.copy()
     c2 = code2.copy()
-
-    # randomly picking two points to perform crossover at
     crossover_points = random.sample([i for i in range(NUM_COLORS)], k=n)
-
-    # swapping substrings at crossover points
     for crossover_point in crossover_points:
         c1[crossover_point:], c2[crossover_point:] = (
             c2[crossover_point:],
@@ -74,17 +89,9 @@ def crossover(code1: list, code2: list, n: int) -> tuple:
 # swaps random color for a different color
 def mutation(code: list) -> list:
     c = code.copy()
-
-    # randomly selected an index
     idx = random.randint(0, PINS - 1)
-
-    # remove element
     removed = c.pop(idx)
-
-    # find a unique color
     new_num = random.choice(list(filter(lambda x: x != removed, COLORS)))
-
-    # insert the new num
     c.insert(idx, new_num)
     return c
 
@@ -92,25 +99,16 @@ def mutation(code: list) -> list:
 # swapping two random indexes in a chromosome
 def permutation(code: list) -> list:
     c = code.copy()
-
-    # select two random indexes
     idx1, idx2 = random.sample(range(4), k=2)
-
-    # swap the values at either location
     c[idx1], c[idx2] = c[idx2], c[idx1]
-
-    # return the new code
     return c
 
 
 # reverses a subset of the chromosome
 def inversion(code: list) -> list:
     c = code.copy()
-
     start, stop = sorted(random.sample(range(PINS), k=2))
-
     c[start : stop + 1] = reversed(c[start : stop + 1])
-
     return c
 
 
@@ -118,7 +116,6 @@ def inversion(code: list) -> list:
 def fitness(code: list, guesses: list) -> int:
     fitness_score = 0
 
-    # finds the sum of differences between the previous guesses and the current guess IF the previous guess was the secret code
     fitness_score += sum(
         abs(check(code, guess)[0] - score[0]) + abs(check(code, guess)[1] - score[1])
         for guess, score in guesses
