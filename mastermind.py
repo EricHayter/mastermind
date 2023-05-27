@@ -1,11 +1,11 @@
 # SOURCE: https://web.archive.org/web/20140909031305/https://lirias.kuleuven.be/bitstream/123456789/164803/1/kbi_0806.pdf
 
-import random
 from collections import Counter
+import random
 
 PINS = 4
-COLORS = [i + 1 for i in range(6)]
-NUM_COLORS = len(COLORS)
+NUM_COLORS = 6
+COLORS = [i + 1 for i in range(NUM_COLORS)]
 POSSIBLE_CODES = [
     [x, y, z, w]
     for x in range(NUM_COLORS)
@@ -22,38 +22,47 @@ MAX_GEN = 100
 # create a guess object to make guesses more explicit
 #   then remove all the copies
 
+class Guess:
+    """class for representing guesses"""
+    def __init__(self, colors: list[int]):
+        if len(list) != PINS:
+            raise Exception(f'Invalid colors list. List must contain {PINS} elements')
+        for color in colors:
+            if color not in range(1, NUM_COLORS+1):
+                raise Exception(f'Invalid color in list. Color value must be in range [1, {NUM_COLORS}]')
+        self.colors = colors
 
-def check(guess: list, answer: list) -> tuple:
-    """Returns the amount of exact matches and near matches in a tuple
+    def check(self, guess: Guess, answer: Guess) -> tuple:
+        """Returns the amount of exact matches and near matches in a tuple
 
-    Args:
-        guess (list[str]): the user's guess containing 4 different colors
-        answer (list[str]): the randomly generated answer containing 4 different
-        colors
+        Args:
+            guess (list[str]): the user's guess containing 4 different colors
+            answer (list[str]): the randomly generated answer containing 4 different
+            colors
 
-    Returns:
-        tuple: a tuple (exact_matches, near_matches) where exact matches is when
-        the guess and answer list have the exact same color at an index in the
-        lists and near matches is the same color is found in both lists but not on
-        the same index.
-    """
-    exact_matches = 0
-    near_matches = 0
+        Returns:
+            tuple: a tuple (exact_matches, near_matches) where exact matches is when
+            the guess and answer list have the exact same color at an index in the
+            lists and near matches is the same color is found in both lists but not on
+            the same index.
+        """
+        exact_matches = 0
+        near_matches = 0
 
-    for guess_i, answer_i in zip(guess, answer):
-        if guess_i == answer_i:
-            exact_matches += 1
+        for guess_i, answer_i in zip(guess.colors, answer.colors):
+            if guess_i == answer_i:
+                exact_matches += 1
 
-    guess_count = Counter(guess)
-    answer_count = Counter(answer)
+        guess_count = Counter(guess.colors)
+        answer_count = Counter(answer.colors)
 
-    for guess_i in guess_count:
-        if guess_i in answer_count:
-            near_matches += min(guess_count[guess_i], answer_count[guess_i])
+        for guess_i in guess_count:
+            if guess_i in answer_count:
+                near_matches += min(guess_count[guess_i], answer_count[guess_i])
 
-    near_matches -= exact_matches
+        near_matches -= exact_matches
 
-    return (exact_matches, near_matches)
+        return (exact_matches, near_matches)
 
 
 def probabilty(chance: float) -> bool:
@@ -68,7 +77,7 @@ def probabilty(chance: float) -> bool:
     return random.random() <= chance
 
 
-def random_code(population: list) -> list:
+def random_code(population: list[Guess]) -> list[Guess]:
     """Returns a random code that is not already in the population
 
     Args:
@@ -107,7 +116,7 @@ def mutation(code: list) -> list:
 
 
 # swapping two random indexes in a chromosome
-def permutation(code: list) -> list:
+def permutation(code: Guess) -> Guess:
     c = code.copy()
     idx1, idx2 = random.sample(range(4), k=2)
     c[idx1], c[idx2] = c[idx2], c[idx1]
@@ -115,7 +124,7 @@ def permutation(code: list) -> list:
 
 
 # reverses a subset of the chromosome
-def inversion(code: list) -> list:
+def inversion(code: Guess) -> Guess:
     c = code.copy()
     start, stop = sorted(random.sample(range(PINS), k=2))
     c[start : stop + 1] = reversed(c[start : stop + 1])
