@@ -18,6 +18,10 @@ POSSIBLE_CODES = [
 MAX_SIZE = 60
 MAX_GEN = 100
 
+# TODO:
+# create a guess object to make guesses more explicit
+#   then remove all the copies
+
 
 def check(guess: list, answer: list) -> tuple:
     """Returns the amount of exact matches and near matches in a tuple
@@ -36,7 +40,6 @@ def check(guess: list, answer: list) -> tuple:
     exact_matches = 0
     near_matches = 0
 
-    # checking for exact matches
     for guess_i, answer_i in zip(guess, answer):
         if guess_i == answer_i:
             exact_matches += 1
@@ -66,14 +69,21 @@ def probabilty(chance: float) -> bool:
 
 
 def random_code(population: list) -> list:
-    """
+    """Returns a random code that is not already in the population
 
+    Args:
+        population: a list of possible guesses/answers
+    Returns:
+        list: a random guess not already present in the population
     """
     return random.choice([x for x in POSSIBLE_CODES if x not in population])
 
 
-# performs a crossover function n number of times
+
 def crossover(code1: list, code2: list, n: int) -> tuple:
+    """
+    can't remeber waht this does XD
+    """
     c1 = code1.copy()
     c2 = code2.copy()
     crossover_points = random.sample([i for i in range(NUM_COLORS)], k=n)
@@ -91,7 +101,7 @@ def mutation(code: list) -> list:
     c = code.copy()
     idx = random.randint(0, PINS - 1)
     removed = c.pop(idx)
-    new_num = random.choice(list(filter(lambda x: x != removed, COLORS)))
+    new_num = random.choice(list(filter(lambda x: x != removed, COLORS))) # remove the lambda
     c.insert(idx, new_num)
     return c
 
